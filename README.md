@@ -2,7 +2,7 @@
 
 Минималистичная викторина на испанском: **HTML, CSS и JavaScript без React и без сборки**. Вопросы взяты из `Jovenes3_S10_Kahoot_velocidad_10preguntas.xlsx`: 10 вопросов, 4 варианта, по 20 секунд, уровень A2.
 
-Исходники: [unicornioespanol/hola-quiz](https://github.com/unicornioespanol/hola-quiz). Репозиторий создан для GitHub Pages; первая публикация ожидает подключения проекта Supabase и заполнения `config.js`.
+Исходники: [unicornioespanol/hola-quiz](https://github.com/unicornioespanol/hola-quiz). GitHub Pages включён в режиме GitHub Actions с HTTPS; первая публикация ожидает подключения проекта Supabase и заполнения `config.js`. При изменениях GitHub автоматически проверяет игровую логику и подготовку статических файлов, без публикации.
 
 ## Посмотреть локально
 
