@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 def validate_config(content):
     def field(name):
-        match = re.search(r"\b" + name + r"\s*:\s*(['\"])([^'\"\r\n]*)\1", content)
+        match = re.search(r"\b" + name + r"['\"]?\s*:\s*(['\"])([^'\"\r\n]*)\1", content)
         return match.group(2).strip() if match else ""
 
     url = field("supabaseUrl")

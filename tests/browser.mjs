@@ -8,10 +8,13 @@ import assert from 'node:assert/strict';
 import { questions } from '../js/questions.js';
 
 const root = path.resolve(import.meta.dirname, '..');
-const db = new PGlite();
-await db.exec('create role anon; create role authenticated;');
-await db.exec(await readFile(path.join(root, 'supabase/schema.sql'), 'utf8'));
-await db.exec(await readFile(path.join(root, 'supabase/seed.sql'), 'utf8'));
+const externalBase = process.env.QUIZ_BASE_URL?.replace(/\/$/, '');
+const db = externalBase ? null : new PGlite();
+if (db) {
+  await db.exec('create role anon; create role authenticated;');
+  await db.exec(await readFile(path.join(root, 'supabase/schema.sql'), 'utf8'));
+  await db.exec(await readFile(path.join(root, 'supabase/seed.sql'), 'utf8'));
+}
 const errors = [];
 let origin;
 const server = createServer(async (req, res) => {
@@ -39,8 +42,11 @@ const server = createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': ({ '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml' })[ext] || 'application/octet-stream' }); res.end(data);
   } catch { res.writeHead(404); res.end('Not found'); }
 });
-await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-origin = `http://127.0.0.1:${server.address().port}`;
+if (externalBase) origin = externalBase;
+else {
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  origin = `http://127.0.0.1:${server.address().port}`;
+}
 await mkdir(path.join(root, 'test-results'), { recursive: true });
 let browser;
 try {
@@ -49,7 +55,7 @@ try {
   const p1Context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
   const p2Context = await browser.newContext({ viewport: { width: 360, height: 780 }, isMobile: true, hasTouch: true });
   const host = await hostContext.newPage(), p1 = await p1Context.newPage(), p2 = await p2Context.newPage();
-  for (const page of [host, p1, p2]) { page.setDefaultTimeout(12000); page.on('pageerror', error => errors.push(error.message)); }
+  for (const page of [host, p1, p2]) { page.setDefaultTimeout(externalBase ? 30000 : 12000); page.on('pageerror', error => errors.push(error.message)); }
   const shot = (page, file) => page.screenshot({ path: path.join(root, 'test-results', file), fullPage: true, animations: 'disabled' });
   const noOverflow = async page => assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Horizontal overflow');
   await host.goto(origin); await host.getByRole('heading', { name: 'América Latina.' }).waitFor();
@@ -69,8 +75,10 @@ try {
   const code = (await host.locator('.room-code').innerText()).trim();
   await host.locator('#room-qr img').waitFor({ state: 'visible' });
   assert((await host.locator('#room-qr img').getAttribute('src')).startsWith('data:image/png;'));
+  const qrUrl = await host.locator('#room-qr').getAttribute('title');
+  assert.equal(qrUrl, `${origin}/?room=${code}`);
   for (const [page, name] of [[p1, 'María'], [p2, 'Luz <b>']]) {
-    await page.goto(`${origin}/?room=${code}`); await page.getByLabel('¿Cómo te llamas?').fill(name);
+    await page.goto(qrUrl); await page.getByLabel('¿Cómo te llamas?').fill(name);
     await page.getByRole('button', { name: 'Entrar a la sala' }).click();
     await page.getByRole('heading', { name: `¡Hola, ${name}!` }).waitFor();
     await noOverflow(page);
@@ -128,7 +136,9 @@ try {
   await host.getByRole('heading', { name: '¡Qué bien nos lo pasamos!' }).waitFor();
   assert.equal(await host.locator('tbody tr').count(), 2);
   assert.deepEqual(errors, []);
-  console.log('Browser QA passed: desktop + 390/360px phones, practice, 2-player live game, reload/rejoin, QR, all questions, rankings, analytics, CSV, restored final report.');
+  console.log(`${externalBase ? 'Published site + real Supabase' : 'Local'} browser QA passed: desktop + 390/360px phones, practice, 2-player live game, reload/rejoin, QR destination, all questions, rankings, student/question details, analytics, CSV, restored report history.`);
 } finally {
-  await browser?.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); await db.close();
+  await browser?.close();
+  if (server.listening) { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
+  await db?.close();
 }

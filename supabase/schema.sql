@@ -51,8 +51,7 @@ begin
   if (select count(*) from quiz_private.questions) <> 10 then raise exception 'Questions not installed. Run seed.sql.'; end if;
   select code into v_code from quiz_private.rooms where host_token=p_token;
   if found then return jsonb_build_object('code',v_code,'token',p_token); end if;
-  -- Expire old sessions and keep classroom data for 30 days.
-  delete from quiz_private.rooms where created_at < now()-interval '30 days';
+  -- Keep classroom results until the owner explicitly chooses to remove them.
   for v_attempt in 1..20 loop
     v_code := (100000 + floor(random()*900000))::integer::text;
     begin
