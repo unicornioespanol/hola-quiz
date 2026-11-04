@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f5ee">
+  <meta name="description" content="Un pequeño viaje, diez preguntas. Un quiz en directo sobre América Latina para Jóvenes 3.">
+  <title>América Latina · hola, quiz</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="config.js"></script>
+  <script src="assets/qrcode.min.js" defer></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="wordmark" href="./" aria-label="hola, quiz — inicio">hola<span>,</span> <i>quiz</i><span class="brand-dot"></span></a>
+      <span class="course-label">JÓVENES 3 <span> / </span> SESIÓN 10</span>
+      <span class="live-label"><span></span> Un viaje para compartir</span>
+    </header>
+    <main id="app" tabindex="-1"></main>
+    <footer class="site-footer"><span>Hecho para aprender juntos.</span><span>AMÉRICA LATINA <span class="footer-star">✳</span> NIVEL A2</span></footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <dialog id="setup-dialog" class="setup-dialog">
+    <form method="dialog"><button class="icon-button close-dialog" aria-label="Cerrar">×</button></form>
+    <span class="eyebrow">CASI LISTO</span><h2>Conectemos la clase.</h2>
+    <p>Para jugar desde varios teléfonos, hay que conectar el servicio de salas. La guía de instalación está en el archivo README del proyecto.</p>
+    <p>Mientras tanto, puedes probar las diez preguntas en modo individual.</p>
+    <button class="button primary" id="setup-practice">Probar el quiz <span>↗</span></button>
+  </dialog>
+</body>
+</html>

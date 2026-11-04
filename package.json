@@ -1,0 +1,15 @@
+{
+  "name": "hola-quiz-america-latina",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "python -m http.server 4173 --bind 127.0.0.1",
+    "test": "node --test tests/*.test.js",
+    "test:browser": "node tests/browser.mjs",
+    "check:live": "node tools/check-live.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.15",
+    "playwright": "1.64.1"
+  }
+}
