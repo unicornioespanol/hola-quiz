@@ -1,6 +1,10 @@
 name: Publish GitHub Pages
 on:
   workflow_dispatch:
+  # Register workflow edits in Actions; only manual runs may publish.
+  push:
+    branches: [main]
+    paths: ['.github/workflows/pages.yml']
 
 permissions:
   contents: read
@@ -13,6 +17,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name == 'workflow_dispatch'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
